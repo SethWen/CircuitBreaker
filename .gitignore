@@ -1,0 +1,11 @@
+# for npm
+node_modules/
+package-lock.json
+
+# for log
+*.log
+/log
+
+# for ide
+.idea/
+.vscode/
