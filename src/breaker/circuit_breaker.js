@@ -5,6 +5,7 @@
  * update: Shawn 11/10/18 5:56 PM
  */
 
+let sessions = new Map();
 
 class Counter {
     constructor(num) {
@@ -27,12 +28,13 @@ class Counter {
 
 class CircuitBreaker {
 
-    constructor() {
+    constructor(options) {
         this.idleTimeForOpen = 20; // 60s
         this.thresholdForOpen = [10, 10]; // s
         this.thresholdForHalfOpen = [5, 10]; // s
         this.counter = new Counter(); // max times for each 60s
         this.state = new CloseState(); // default state
+        this.restore();
     }
 
     getState() {
@@ -61,6 +63,11 @@ class CircuitBreaker {
         return this.counter.get();
     }
 
+    restore() {
+        // 恢复 state; 恢复 num;
+        // this.counter = redis.getString();
+        // this.state = redis.getState();
+    }
 }
 
 
