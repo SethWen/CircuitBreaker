@@ -12,7 +12,6 @@ const logger = require('./util/logger');
 
 class App extends AbstractServer {
 
-
     constructor(name, version, port) {
         super(name, version, port);
         this.circuitBreaker = new CircuitBreaker();
