@@ -7,31 +7,33 @@
 
 
 const logger = require('../util/logger');
-const CircuitBreaker = require('./circuit_breaker');
+const AbstractCircuitBreaker = require('./abstract_circuit_breaker');
 const {Counter} = require('./counter');
 const {CloseState, HalfOpenState, OpenState} = require('./state');
 
 
-let sessions = new Map();
-let ex = {
-    state: 'OpenState',
-    count: 3,
-};
-sessions.set('testid', ex);
-
-class MyCircuitBreaker extends CircuitBreaker {
+class MyCircuitBreaker extends AbstractCircuitBreaker {
 
     constructor(id) {
         super();
-        this.restore(id)
+        this.restore(id);
     }
 
     restore(id) {
-        let session = sessions.get(id);
-        this.state = eval(`new ${session['state']}()`);
-        this.counter = new Counter(session['count']);
-        logger.info(`restore breaker: state=${this.state.getName()}, count=${session['count']}`);
+        let session = globalSessions.get(id);
+        if (session) {
+            console.log('restore --> 111111111 = ', session['startTime']);
+            this.state = eval(`new ${session['state']}(${session['startTime']})`);
+            this.counter = new Counter(session['count']);
+            logger.info(`restore breaker: state=${this.state.getName()}, count=${this.counter.get()}`);
+        } else {
+            this.state = new CloseState();
+            this.counter = new Counter(0);
+            logger.info(`init breaker: state=${this.state.getName()}, count=${this.counter.get()}`);
+        }
     }
 }
 
-new MyCircuitBreaker('testid');
+// new MyCircuitBreaker('testid');
+
+module.exports = MyCircuitBreaker;

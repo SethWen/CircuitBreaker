@@ -4,19 +4,24 @@
  * desc  :
  * update: Shawn 11/10/18 5:56 PM
  */
+
+
 const logger = require('../util/logger');
-const {CloseState, HalfOpenState, OpenState} = require('./state');
-const {Counter} = require('./counter');
 
 
-class CircuitBreaker {
+class AbstractCircuitBreaker {
 
     constructor() {
         this.idleTimeForOpen = 20; // 60s
         this.thresholdForOpen = [10, 10]; // s
         this.thresholdForHalfOpen = [5, 10]; // s
-        this.counter = new Counter(); // max times for each 60s
-        this.state = new CloseState(); // default state
+    }
+
+    /**
+     * subclass must implement this function
+     */
+    init() {
+
     }
 
     getState() {
@@ -47,7 +52,7 @@ class CircuitBreaker {
 }
 
 
-module.exports = CircuitBreaker;
+module.exports = AbstractCircuitBreaker;
 
 
 // test

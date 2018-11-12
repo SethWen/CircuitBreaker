@@ -7,25 +7,47 @@
 
 
 const AbstractServer = require('./abstract_server');
-const CircuitBreaker = require('./breaker/circuit_breaker');
+const MyCircuitBreaker = require('./breaker/my_circuit_breaker');
 const logger = require('./util/logger');
+
+global.globalSessions = new Map();
+// let ex = {
+//     state: 'OpenState',
+//     count: 3,
+// };
+// sessions.set('testid', ex);
 
 class App extends AbstractServer {
 
     constructor(name, version, port) {
         super(name, version, port);
-        this.circuitBreaker = new CircuitBreaker();
     }
 
 
     checkFlow(req, res, next) {
         logger.debug('come into check flow');
-        this.circuitBreaker.count();
-        if (this.circuitBreaker.canPass()) {
+        let appid = req.query['appid'];
+        console.log('checkFlow --> appid = ', appid);
+        let breaker = new MyCircuitBreaker(appid); // 鸡蛋问题
+        breaker.count();
+        globalSessions.set(appid, {
+            state: breaker.getState().getName(),
+            count: breaker.getCount(),
+            startTime: breaker.getState().startTime
+        });
+        console.log('checkFlow --> sessions = ', globalSessions);
+        if (breaker.canPass()) {
             next();
         } else {
-            res.send('reject')
+            res.send('reject');
         }
+
+        // this.circuitBreaker.count();
+        // if (this.circuitBreaker.canPass()) {
+        //     next();
+        // } else {
+        //     res.send('reject')
+        // }
     }
 
     setPlugin() {

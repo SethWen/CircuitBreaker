@@ -6,8 +6,8 @@
  */
 
 class Counter {
-    constructor(num) {
-        this.num = 0;
+    constructor(num = 0) {
+        this.num = num;
     }
 
     get() {
