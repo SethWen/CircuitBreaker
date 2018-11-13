@@ -11,7 +11,6 @@ const logger = require('../util/logger');
 class AbstractState {
 
     constructor(time = Date.now()) {
-        console.log('constructor --> abstractState = ', time);
         this.startTime = time;
         logger.info(`${this.getName()} --> startTime = ${this.startTime / 1000}`);
     }

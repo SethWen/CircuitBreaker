@@ -7,15 +7,15 @@
 
 
 const AbstractServer = require('./abstract_server');
-const MyCircuitBreaker = require('./breaker/my_circuit_breaker');
+const BaseCircuitBreaker = require('./breaker/base_circuit_breaker');
 const logger = require('./util/logger');
 
-global.globalSessions = new Map();
-// let ex = {
-//     state: 'OpenState',
-//     count: 3,
-// };
-// sessions.set('testid', ex);
+let globalBreakers = new Map();
+
+// setInterval(() => {
+//     console.log('global -->  = ', globalBreakers);
+// }, 3000);
+
 
 class App extends AbstractServer {
 
@@ -23,31 +23,30 @@ class App extends AbstractServer {
         super(name, version, port);
     }
 
-
     checkFlow(req, res, next) {
         logger.debug('come into check flow');
         let appid = req.query['appid'];
-        console.log('checkFlow --> appid = ', appid);
-        let breaker = new MyCircuitBreaker(appid); // 鸡蛋问题
+        if (!appid) {
+            logger.error('no appid');
+            res.end('no appid\n');
+            return;
+        }
+        logger.debug('checkFlow --> appid = ' + appid);
+
+        let breaker;
+        if (globalBreakers.has(appid)) {
+            breaker = globalBreakers.get(appid);
+        } else {
+            breaker = new BaseCircuitBreaker();
+            globalBreakers.set(appid, breaker);
+        }
+
         breaker.count();
-        globalSessions.set(appid, {
-            state: breaker.getState().getName(),
-            count: breaker.getCount(),
-            startTime: breaker.getState().startTime
-        });
-        console.log('checkFlow --> sessions = ', globalSessions);
         if (breaker.canPass()) {
             next();
         } else {
-            res.send('reject');
+            res.end('reject\n');
         }
-
-        // this.circuitBreaker.count();
-        // if (this.circuitBreaker.canPass()) {
-        //     next();
-        // } else {
-        //     res.send('reject')
-        // }
     }
 
     setPlugin() {
@@ -62,7 +61,7 @@ class App extends AbstractServer {
 
     test(req, res, next) {
         logger.debug('come into test');
-        res.send('ok\n');
+        res.end('ok\n');
     }
 }
 
