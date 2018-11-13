@@ -11,7 +11,7 @@ const {CloseState, HalfOpenState, OpenState} = require('./state');
 const {Counter} = require('./counter');
 
 
-class BaseCircuitBreaker {
+class CircuitBreaker {
 
     /**
      * @param thresholdForOpen {string} format: '600/60'
@@ -58,5 +58,5 @@ class BaseCircuitBreaker {
 }
 
 
-module.exports = BaseCircuitBreaker;
+module.exports = CircuitBreaker;
 

@@ -33,9 +33,6 @@ class AbstractServer {
         this.setFork();
         this.setPlugin();
 
-        // api访问安全检测过滤
-        // server.use(require('../frontend/api_security'));
-
         this.initApi();
         this.initPort();
         this.onNotFound();

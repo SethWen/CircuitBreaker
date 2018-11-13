@@ -10,17 +10,13 @@ const AbstractServer = require('./abstract_server');
 const CircuitBreaker = require('./breaker/circuit_breaker');
 const logger = require('./util/logger');
 
-let globalBreakers = new Map();
-
-// setInterval(() => {
-//     console.log('global -->  = ', globalBreakers);
-// }, 3000);
-
 
 class App extends AbstractServer {
 
     constructor(name, version, port) {
         super(name, version, port);
+        // 为方便测试, 观察效果, 我们使用较小的阈值
+        this.breaker = new CircuitBreaker('10/10', 20, '5/10');
     }
 
     checkFlow(req, res, next) {
@@ -33,16 +29,8 @@ class App extends AbstractServer {
         }
         logger.debug('checkFlow --> appid = ' + appid);
 
-        let breaker;
-        if (globalBreakers.has(appid)) {
-            breaker = globalBreakers.get(appid);
-        } else {
-            breaker = new CircuitBreaker();
-            globalBreakers.set(appid, breaker);
-        }
-
-        breaker.count();
-        if (breaker.canPass()) {
+        this.breaker.count();
+        if (this.breaker.canPass()) {
             next();
         } else {
             res.end('reject\n');
